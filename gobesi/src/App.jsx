@@ -1,7 +1,8 @@
-import { useState } from 'react';
-import './App.css';
+import { useState } from 'react'; // import the useState hook from react
+import './App.css'; // import the css file for styling
 
 function App() {
+  // initialize the student state with default values
   const [student, setStudent] = useState({
     student_number: '',
     first_name: '',
@@ -14,10 +15,14 @@ function App() {
     password: ''
   });
 
+  // state for storing the currently fetched student info
   const [currentStudent, setCurrentStudent] = useState(null);
+  // state for showing a loading spinner or disabling buttons
   const [loading, setLoading] = useState(false);
+  // state for displaying success or error messages
   const [message, setMessage] = useState('');
 
+  // update the student state when any input field changes
   const handleChange = (e) => {
     setStudent({
       ...student,
@@ -25,16 +30,18 @@ function App() {
     });
   };
 
+  // handle form submission for creating a student
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+    e.preventDefault(); // prevent default form submission behavior
+    setLoading(true); // show loading indicator
     try {
-      // Validate required fields
+      // check if all required fields are filled
       if (!student.student_number || !student.first_name || !student.middle_name || 
           !student.last_name || !student.birthdate || !student.username || !student.password) {
-        throw new Error('All fields are required');
+        throw new Error('All fields are required'); // throw an error if any field is missing
       }
 
+      // send a POST request to the backend to create a new student
       const response = await fetch('http://localhost:3000/api/students', {
         method: 'POST',
         headers: {
@@ -43,43 +50,54 @@ function App() {
         body: JSON.stringify(student),
       });
 
+      // check if the response is not successful
       if (!response.ok) {
         throw new Error('Failed to create student');
       }
 
+      // parse the response and update currentStudent state
       const data = await response.json();
       setCurrentStudent(data.data);
       setMessage('Student created successfully!');
     } catch (error) {
+      // display error message if something goes wrong
       setMessage(error.message);
     } finally {
+      // stop the loading indicator
       setLoading(false);
     }
   };
 
+  // handle searching for a student by student number
   const handleSearch = async () => {
+    // check if student number is provided
     if (!student.student_number) {
       setMessage('Please enter a student number');
       return;
     }
     
-    setLoading(true);
+    setLoading(true); // show loading indicator
     try {
+      // send a GET request to the backend to fetch student data
       const response = await fetch(
         `http://localhost:3000/api/students/${student.student_number}`
       );
 
+      // if student is not found
       if (!response.ok) {
         throw new Error('Student not found');
       }
 
+      // parse and store the fetched student data
       const data = await response.json();
       setCurrentStudent(data.data);
       setMessage('');
     } catch (error) {
+      // show error if fetch fails
       setMessage(error.message);
       setCurrentStudent(null);
     } finally {
+      // stop the loading indicator
       setLoading(false);
     }
   };
@@ -88,9 +106,11 @@ function App() {
     <div className="app">
       <h1>Student Management System</h1>
 
+      {/* form to create new student */}
       <div className="card">
         <h2>Create New Student</h2>
         <form onSubmit={handleSubmit}>
+          {/* input field for student number */}
           <div className="form-group">
             <label>Student Number*:</label>
             <input
@@ -103,6 +123,7 @@ function App() {
             />
           </div>
 
+          {/* input field for first name */}
           <div className="form-group">
             <label>First Name*:</label>
             <input
@@ -115,6 +136,7 @@ function App() {
             />
           </div>
 
+          {/* input field for middle name */}
           <div className="form-group">
             <label>Middle Name*:</label>
             <input
@@ -127,6 +149,7 @@ function App() {
             />
           </div>
 
+          {/* input field for last name */}
           <div className="form-group">
             <label>Last Name*:</label>
             <input
@@ -139,6 +162,7 @@ function App() {
             />
           </div>
 
+          {/* dropdown for selecting degree program */}
           <div className="form-group">
             <label>Degree Program*:</label>
             <select
@@ -154,6 +178,7 @@ function App() {
             </select>
           </div>
 
+          {/* radio buttons for selecting gender */}
           <div className="form-group">
             <label>Gender*:</label>
             <div className="radio-group">
@@ -181,6 +206,7 @@ function App() {
             </div>
           </div>
 
+          {/* input field for birthdate */}
           <div className="form-group">
             <label>Birthdate*:</label>
             <input
@@ -192,6 +218,7 @@ function App() {
             />
           </div>
 
+          {/* input field for username */}
           <div className="form-group">
             <label>Username*:</label>
             <input
@@ -204,6 +231,7 @@ function App() {
             />
           </div>
 
+          {/* input field for password */}
           <div className="form-group">
             <label>Password*:</label>
             <input
@@ -216,12 +244,14 @@ function App() {
             />
           </div>
 
+          {/* submit button with loading indicator */}
           <button type="submit" disabled={loading}>
             {loading ? 'Processing...' : 'Create Student'}
           </button>
         </form>
       </div>
 
+      {/* form for searching a student */}
       <div className="card">
         <h2>Search Student</h2>
         <div className="search-group">
@@ -238,10 +268,12 @@ function App() {
         </div>
       </div>
 
+      {/* message for success or error */}
       {message && <div className={`message ${message.includes('success') ? 'success' : 'error'}`}>
         {message}
       </div>}
 
+      {/* display student info if available */}
       {currentStudent && (
         <div className="student-info">
           <h3>Student Details</h3>
@@ -257,4 +289,4 @@ function App() {
   );
 }
 
-export default App;
+export default App; // export the App component for use in other files

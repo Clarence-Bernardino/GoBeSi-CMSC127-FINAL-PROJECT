@@ -1,0 +1,26 @@
+Flow of the code:
+1) UI (App.jsx)
+    user fills out the form and clicks “submit.”
+    handleSubmit (or handleSearch) calls fetch() to http://localhost:3000/api/....
+
+2) Express Server (server.js + router.js)
+    server.js uses the routes at router.js at /api.
+    when a request hits /api/students or /api/organizations, router.js matches the path and HTTP verb and forwards to the correct controller function.
+
+3) Controller (e.g. studentController.js)
+    receives the req object (with req.body or req.params).
+    calls a database helper (from database.js) to perform the actual SQL operation.
+    packages the result (or an error) into a JSON response and sends it back.
+
+4) Database Helpers (database.js)
+    export functions like addStudent(), getStudent(), addOrganization(), etc.
+    each function spins up a prepared query (pool.query("…?", […])), executes it, and returns the result.
+
+5) MySQL Database
+    receives the parameterized query, safely inserts/reads data, and returns rows or insert IDs.
+    
+6) Back to the Controller
+    controller gets the result from the helper, then calls res.json() (or res.status(201).json()).
+
+7) Back to the Frontend
+    the fetch() promise resolves with JSON, which we parse and use to update React state (setCurrentStudent, setMessage, etc.).

@@ -11,6 +11,7 @@ export const pool = mysql.createPool({ // pool = collection of connections to ou
     database: "gobesi"
 }).promise()
 
+// function to show tables
 export async function showTables() {
     const result = await pool.query("show tables");
     return result;
@@ -19,7 +20,14 @@ export async function showTables() {
 const tables = await showTables();
 console.log(tables);
 
-// Student Operations
+// student operations
+
+// when building SQL queries with user input, there's a risk of SQL injection — for example:
+// (SELECT * FROM users WHERE username = '' OR '1'='1')
+// to prevent this, we use prepared statements.
+// instead of inserting user input directly into the SQL string, we use question marks (?) as placeholders.
+// we then pass the actual data separately in a list, telling the database: "treat this strictly as data, not as SQL code."
+
 export async function addStudent(studentData) {
     const [result] = await pool.query(`
         INSERT INTO student 
@@ -63,7 +71,7 @@ export async function deleteStudent(studentNumber) {
     `, [studentNumber]);
 }
 
-// Organization Operations
+// organization Operations
 export async function addOrganization(orgData) {
     const [result] = await pool.query(`
         INSERT INTO organization 
@@ -81,7 +89,7 @@ export async function getOrganization(orgName) {
     return rows[0];
 }
 
-// Fee Operations
+// fee Operations
 export async function addFee(feeData) {
     const [result] = await pool.query(`
         INSERT INTO fee 
@@ -99,10 +107,10 @@ export async function addFee(feeData) {
         feeData.student_number,
         feeData.organization_name
     ]);
-    return result.insertId;  // Returns the auto-generated transaction_id
+    return result.insertId;  // returns the auto-generated transaction_id
 }
 
-// Membership Operations
+// membership Operations
 export async function addMembership(membershipData) {
     const [result] = await pool.query(`
         INSERT INTO has_a_membership 
@@ -121,7 +129,7 @@ export async function addMembership(membershipData) {
     return result;
 }
 
-// Student Record View
+// student record view
 export async function getStudentRecord(studentNumber) {
     const [rows] = await pool.query(`
         SELECT * FROM student_record 
