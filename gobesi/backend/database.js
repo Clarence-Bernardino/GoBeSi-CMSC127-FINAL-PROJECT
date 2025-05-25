@@ -110,6 +110,26 @@ export async function addFee(feeData) {
     return result.insertId;  // returns the auto-generated transaction_id
 }
 
+// checks if a similar fee record already exists
+export async function feeExists(feeData) {
+    const [rows] = await pool.query(`
+        SELECT * FROM fee
+        WHERE student_number = ?
+        AND organization_name = ?
+        AND academic_year = ?
+        AND semester = ?
+        AND type = ?
+    `, [
+        feeData.student_number,
+        feeData.organization_name,
+        feeData.academic_year,
+        feeData.semester,
+        feeData.type
+    ]);
+
+    return rows.length > 0;  // true if any matching record found
+}
+
 // membership Operations
 export async function addMembership(membershipData) {
     const [result] = await pool.query(`
@@ -127,6 +147,14 @@ export async function addMembership(membershipData) {
         membershipData.role
     ]);
     return result;
+}
+
+export async function membershipExists(studentNumber, organizationName) {
+    const [rows] = await pool.query(`
+        SELECT * FROM has_a_membership 
+        WHERE student_number = ? AND organization_name = ?
+    `, [studentNumber, organizationName]);
+    return rows.length > 0;
 }
 
 // student record view

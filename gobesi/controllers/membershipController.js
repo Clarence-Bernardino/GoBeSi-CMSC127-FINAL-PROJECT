@@ -1,20 +1,32 @@
-// import function to add a new Membership to the database
-import { addMembership } from "../backend/database.js";
+import { addMembership, getStudent, getOrganization, membershipExists } from "../backend/database.js";
 
-// handles creation of a new Membership
 export const createMembership = async (req, res) => {
   try {
-    // get Membership data from request body
     const membershipData = req.body;
 
-    // add the Membership to the database
+    // validate student existence
+    const student = await getStudent(membershipData.student_number);
+    if (!student) {
+      return res.status(404).json({ success: false, error: "Student not found" });
+    }
+
+    // validate organization existence
+    const organization = await getOrganization(membershipData.organization_name);
+    if (!organization) {
+      return res.status(404).json({ success: false, error: "Organization not found" });
+    }
+
+    // check if the student already has a memberhsip to that org
+    if (await membershipExists(membershipData.student_number, membershipData.organization_name)) {
+      return res.status(400).json({ success: false, error: "Membership already exists" });
+    } 
+
+    // Proceed to add membership
     const membership = await addMembership(membershipData);
 
-    // send success response with Membership data
     res.status(201).json({ success: true, data: membership });
   } catch (error) {
-    // log error and send failure response
-    console.error(error);
+    console.error("Error creating membership:", error);
     res.status(500).json({ success: false, error: "Failed to create Membership" });
   }
 };
